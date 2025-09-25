@@ -1,4 +1,5 @@
 # GoReleaser configuration for kubectx-manager
+version: 2
 project_name: kubectx-manager
 
 # Build configuration
@@ -23,11 +24,7 @@ builds:
 
 # Archive configuration
 archives:
-  - format: tar.gz
-    # Windows archives should use zip
-    format_overrides:
-      - goos: windows
-        format: zip
+  - id: default
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     files:
       - README.md
