@@ -120,7 +120,7 @@ linters:
   # Deprecated/removed linters:
   # - golint (use revive instead)
   # - maligned (removed from golangci-lint)
-  # - gomnd (renamed to mnd)
+  # - mnd (renamed to mnd)
 
 issues:
   exclude-rules:
