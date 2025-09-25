@@ -8,8 +8,7 @@ run:
 
 output:
   formats:
-    - format: colored-line-number
-      path: stdout
+    colored-line-number: stdout
   print-issued-lines: true
   print-linter-name: true
 
@@ -24,11 +23,6 @@ linters-settings:
   shadow:
     strict: true
 
-  gofmt:
-    simplify: true
-
-  goimports:
-    local-prefixes: github.com/akurinnoy/kubectx-manager
 
   # golint: deprecated, replaced by revive
   revive:
@@ -89,13 +83,10 @@ linters:
     - goconst
     - gocritic
     - gocyclo
-    - gofmt
-    - goimports
     - revive
     - mnd
     - goprintffuncname
     - gosec
-    - gosimple
     - govet
     - ineffassign
     - lll
@@ -105,8 +96,6 @@ linters:
     - nolintlint
     - rowserrcheck
     - staticcheck
-    - stylecheck
-    - typecheck
     - unconvert
     - unparam
     - unused
