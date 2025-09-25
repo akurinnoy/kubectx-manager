@@ -11,6 +11,14 @@ import (
 	"strings"
 )
 
+const (
+	// File permissions for configuration files
+	configFileMode = 0644 // readable by all, writable by owner
+	configDirMode  = 0755 // readable/executable by all, writable by owner
+)
+
+// Config represents the configuration for kubectx-manager.
+// It contains whitelist patterns used to match contexts that should be ignored during cleanup.
 type Config struct {
 	Whitelist []string `yaml:"whitelist"`
 	patterns  []*regexp.Regexp
@@ -29,14 +37,12 @@ func Load(configPath string) (*Config, error) {
 	}
 
 	// Read config file
-	file, err := os.Open(configPath)
+	file, err := os.Open(configPath) //nolint:gosec // User-specified config file path is intentional
 	if err != nil {
 		return nil, fmt.Errorf("failed to open config file: %w", err)
 	}
 	defer func() {
-		if closeErr := file.Close(); closeErr != nil {
-			// Log error if needed, but don't fail the operation
-		}
+		_ = file.Close() //nolint:errcheck // Best effort close, error handling not critical here
 	}()
 
 	scanner := bufio.NewScanner(file)
@@ -96,7 +102,7 @@ func compilePattern(pattern string) (*regexp.Regexp, error) {
 func createDefaultConfig(configPath string) error {
 	// Create directory if it doesn't exist
 	dir := filepath.Dir(configPath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, configDirMode); err != nil {
 		return err
 	}
 
@@ -112,5 +118,5 @@ func createDefaultConfig(configPath string) error {
 # Add your patterns below (one per line):
 `
 
-	return os.WriteFile(configPath, []byte(defaultContent), 0644)
+	return os.WriteFile(configPath, []byte(defaultContent), configFileMode)
 }

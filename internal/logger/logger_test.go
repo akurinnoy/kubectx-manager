@@ -54,7 +54,7 @@ func TestDebug(t *testing.T) {
 			os.Stderr = w
 
 			logger := New(tt.verbose, tt.quiet)
-			logger.Debug("test message %s", "arg")
+			logger.Debugf("test message %s", "arg")
 
 			w.Close()
 			os.Stderr = oldStderr
@@ -73,10 +73,8 @@ func TestDebug(t *testing.T) {
 				if !strings.Contains(outputStr, "test message arg") {
 					t.Errorf("Expected formatted message, got %q", outputStr)
 				}
-			} else {
-				if outputStr != "" {
-					t.Errorf("Expected no output, got %q", outputStr)
-				}
+			} else if outputStr != "" {
+				t.Errorf("Expected no output, got %q", outputStr)
 			}
 		})
 	}
@@ -103,7 +101,7 @@ func TestInfo(t *testing.T) {
 			os.Stdout = w
 
 			logger := New(tt.verbose, tt.quiet)
-			logger.Info("test info %s", "message")
+			logger.Infof("test info %s", "message")
 
 			w.Close()
 			os.Stdout = oldStdout
@@ -119,10 +117,8 @@ func TestInfo(t *testing.T) {
 				if !strings.Contains(outputStr, "test info message") {
 					t.Errorf("Expected formatted message, got %q", outputStr)
 				}
-			} else {
-				if outputStr != "" {
-					t.Errorf("Expected no output, got %q", outputStr)
-				}
+			} else if outputStr != "" {
+				t.Errorf("Expected no output, got %q", outputStr)
 			}
 		})
 	}
@@ -150,7 +146,7 @@ func TestWarn(t *testing.T) {
 			os.Stderr = w
 
 			logger := New(tt.verbose, tt.quiet)
-			logger.Warn("test warning %s", "message")
+			logger.Warnf("test warning %s", "message")
 
 			w.Close()
 			os.Stderr = oldStderr
@@ -169,10 +165,8 @@ func TestWarn(t *testing.T) {
 				if !strings.Contains(outputStr, "test warning message") {
 					t.Errorf("Expected formatted message, got %q", outputStr)
 				}
-			} else {
-				if outputStr != "" {
-					t.Errorf("Expected no output, got %q", outputStr)
-				}
+			} else if outputStr != "" {
+				t.Errorf("Expected no output, got %q", outputStr)
 			}
 		})
 	}
@@ -200,7 +194,7 @@ func TestError(t *testing.T) {
 			os.Stderr = w
 
 			logger := New(tt.verbose, tt.quiet)
-			logger.Error("test error %s", "message")
+			logger.Errorf("test error %s", "message")
 
 			w.Close()
 			os.Stderr = oldStderr
@@ -219,10 +213,8 @@ func TestError(t *testing.T) {
 				if !strings.Contains(outputStr, "test error message") {
 					t.Errorf("Expected formatted message, got %q", outputStr)
 				}
-			} else {
-				if outputStr != "" {
-					t.Errorf("Expected no output, got %q", outputStr)
-				}
+			} else if outputStr != "" {
+				t.Errorf("Expected no output, got %q", outputStr)
 			}
 		})
 	}
@@ -278,13 +270,13 @@ func TestLoggerBehaviorMatrix(t *testing.T) {
 			// Call the appropriate log method
 			switch combo.level {
 			case "debug":
-				logger.Debug("test")
+				logger.Debugf("test")
 			case "info":
-				logger.Info("test")
+				logger.Infof("test")
 			case "warn":
-				logger.Warn("test")
+				logger.Warnf("test")
 			case "error":
-				logger.Error("test")
+				logger.Errorf("test")
 			}
 
 			wOut.Close()

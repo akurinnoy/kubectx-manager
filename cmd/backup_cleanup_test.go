@@ -81,16 +81,16 @@ func TestBackupCleanupAfterRestore(t *testing.T) {
 
 			// Then apply the cleanup logic (this is the exact code from runRestore)
 			if !tt.keepBackup {
-				log.Debug("Cleaning up backup file: %s", selectedBackup.Path)
+				log.Debugf("Cleaning up backup file: %s", selectedBackup.Path)
 				err = os.Remove(selectedBackup.Path)
 				if err != nil {
-					log.Warn("Failed to remove backup file %s: %v", selectedBackup.Path, err)
-					log.Warn("You may want to manually remove it")
+					log.Warnf("Failed to remove backup file %s: %v", selectedBackup.Path, err)
+					log.Warnf("You may want to manually remove it")
 				} else {
-					log.Info("Removed backup file: %s", selectedBackup.Name)
+					log.Infof("Removed backup file: %s", selectedBackup.Name)
 				}
 			} else {
-				log.Info("Backup file preserved: %s", selectedBackup.Name)
+				log.Infof("Backup file preserved: %s", selectedBackup.Name)
 			}
 
 			// Verify the expected state
@@ -118,7 +118,7 @@ func TestBackupCleanupErrorHandling(t *testing.T) {
 	err := os.Remove(nonExistentBackup)
 	if err != nil {
 		// Expected behavior - test graceful error handling
-		log.Warn("Failed to remove backup file %s: %v", nonExistentBackup, err)
+		log.Warnf("Failed to remove backup file %s: %v", nonExistentBackup, err)
 	}
 
 	// The test passes if we get here without panicking
@@ -131,7 +131,7 @@ func TestKeepBackupFlagFunctionality(t *testing.T) {
 	flag := cmd.Flags().Lookup("keep-backup")
 
 	if flag == nil {
-		t.Error("--keep-backup flag should be defined")
+		t.Fatal("--keep-backup flag should be defined")
 	}
 
 	if flag.DefValue != "false" {

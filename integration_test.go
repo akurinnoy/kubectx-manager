@@ -1,3 +1,5 @@
+// Package main provides integration tests for kubectx-manager.
+// These tests verify the complete functionality of the CLI tool in real-world scenarios.
 package main
 
 import (
@@ -293,9 +295,7 @@ users:
 	}
 
 	// Verify current-context is still valid
-	if strings.Contains(modifiedStr, `current-context: production-cluster`) {
-		// Current context should remain unchanged
-	} else {
+	if !strings.Contains(modifiedStr, `current-context: production-cluster`) {
 		t.Errorf("current-context should remain as production-cluster")
 	}
 }

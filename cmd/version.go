@@ -14,7 +14,7 @@ var versionCmd = &cobra.Command{
 	RunE:  runVersion,
 }
 
-func runVersion(cmd *cobra.Command, args []string) error {
+func runVersion(_ *cobra.Command, _ []string) error {
 	fmt.Printf("kubectx-manager version %s\n", Version)
 	fmt.Printf("Git commit: %s\n", GitCommit)
 	fmt.Printf("Build date: %s\n", BuildDate)

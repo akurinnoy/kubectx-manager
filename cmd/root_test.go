@@ -21,6 +21,12 @@ func TestRootCommand(t *testing.T) {
 	if cmd.Use != "kubectx-manager" {
 		t.Errorf("Expected command name 'kubectx-manager', got %s", cmd.Use)
 	}
+	if cmd.Short != "Clean up Kubernetes contexts from your kubeconfig" {
+		t.Errorf("Expected command short description, got %s", cmd.Short)
+	}
+	if cmd.RunE == nil {
+		t.Error("Expected RunE function to be set")
+	}
 }
 
 func TestFindContextsToRemove(t *testing.T) {
@@ -212,7 +218,7 @@ func TestFlagsInitialization(t *testing.T) {
 	// Test flag defaults
 	flag := testCmd.Flags().Lookup("dry-run")
 	if flag == nil {
-		t.Error("dry-run flag not found")
+		t.Fatal("dry-run flag not found")
 	}
 	if flag.DefValue != "false" {
 		t.Errorf("Expected dry-run default to be 'false', got %s", flag.DefValue)
@@ -220,7 +226,7 @@ func TestFlagsInitialization(t *testing.T) {
 
 	flag = testCmd.Flags().Lookup("interactive")
 	if flag == nil {
-		t.Error("interactive flag not found")
+		t.Fatal("interactive flag not found")
 	}
 	if flag.DefValue != "false" {
 		t.Errorf("Expected interactive default to be 'false', got %s", flag.DefValue)
@@ -228,7 +234,7 @@ func TestFlagsInitialization(t *testing.T) {
 
 	flag = testCmd.Flags().Lookup("config")
 	if flag == nil {
-		t.Error("config flag not found")
+		t.Fatal("config flag not found")
 	}
 	if !strings.Contains(flag.DefValue, ".kubectx-manager_ignore") {
 		t.Errorf("Expected config default to contain '.kubectx-manager_ignore', got %s", flag.DefValue)

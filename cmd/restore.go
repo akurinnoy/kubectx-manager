@@ -43,7 +43,7 @@ Intelligently handles backup creation to avoid redundant backups.`,
 	RunE: runRestore,
 }
 
-func init() {
+func init() { //nolint:gochecknoinits // Cobra CLI flag setup requires init
 	rootCmd.AddCommand(restoreCmd)
 	restoreCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose (debug) output")
 	restoreCmd.Flags().BoolVarP(&quiet, "quiet", "q", false, "Suppress all output except errors")
@@ -52,7 +52,7 @@ func init() {
 	restoreCmd.Flags().StringVarP(&kubeConfig, "kubeconfig", "k", "", "Path to kubeconfig file to restore")
 }
 
-func runRestore(cmd *cobra.Command, args []string) error {
+func runRestore(_ *cobra.Command, _ []string) error {
 	// Initialize logger
 	log := logger.New(verbose, quiet)
 
@@ -68,8 +68,8 @@ func runRestore(cmd *cobra.Command, args []string) error {
 		kubeConfig = filepath.Join(homeDir, ".kube", "config")
 	}
 
-	log.Debug("Starting kubeconfig restore...")
-	log.Debug("Kubeconfig file: %s", kubeConfig)
+	log.Debugf("Starting kubeconfig restore...")
+	log.Debugf("Kubeconfig file: %s", kubeConfig)
 
 	// Find available backups
 	backups, err := findBackups(kubeConfig)
@@ -78,14 +78,14 @@ func runRestore(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(backups) == 0 {
-		log.Info("No backups found for %s", kubeConfig)
+		log.Infof("No backups found for %s", kubeConfig)
 		return nil
 	}
 
 	// Display available backups
-	log.Info("Available backups:")
+	log.Infof("Available backups:")
 	for i, backup := range backups {
-		log.Info("  %d. %s (%s)", i+1, backup.Name, backup.TimeStr)
+		log.Infof("  %d. %s (%s)", i+1, backup.Name, backup.TimeStr)
 	}
 
 	// Get user selection
@@ -95,16 +95,16 @@ func runRestore(cmd *cobra.Command, args []string) error {
 	}
 
 	if selection == 0 {
-		log.Info("Restore canceled")
+		log.Infof("Restore canceled")
 		return nil
 	}
 
 	selectedBackup := backups[selection-1]
-	log.Info("Selected backup: %s", selectedBackup.Name)
+	log.Infof("Selected backup: %s", selectedBackup.Name)
 
 	// Confirm restore
 	if !confirmRestore(selectedBackup.Name, kubeConfig) {
-		log.Info("Restore canceled")
+		log.Infof("Restore canceled")
 		return nil
 	}
 
@@ -112,28 +112,28 @@ func runRestore(cmd *cobra.Command, args []string) error {
 	if !noBackup {
 		shouldCreateBackup, reason, conflicts := shouldCreateBackupBeforeRestore(kubeConfig, backups, selectedBackup, log)
 		if shouldCreateBackup {
-			log.Debug("Creating backup: %s", reason)
+			log.Debugf("Creating backup: %s", reason)
 
-			if conflicts != nil && len(conflicts) > 0 {
+			if len(conflicts) > 0 {
 				// Create selective backup
 				currentBackupPath, err := createSelectiveBackup(kubeConfig, conflicts, log)
 				if err != nil {
 					return fmt.Errorf("failed to create selective backup: %w", err)
 				}
-				log.Info("Created selective backup of conflicting items: %s", currentBackupPath)
+				log.Infof("Created selective backup of conflicting items: %s", currentBackupPath)
 			} else {
 				// Create full backup
 				currentBackupPath, err := kubeconfig.CreateBackup(kubeConfig)
 				if err != nil {
 					return fmt.Errorf("failed to backup current kubeconfig: %w", err)
 				}
-				log.Info("Created full backup of current kubeconfig: %s", currentBackupPath)
+				log.Infof("Created full backup of current kubeconfig: %s", currentBackupPath)
 			}
 		} else {
-			log.Info("Skipping backup: %s", reason)
+			log.Infof("Skipping backup: %s", reason)
 		}
 	} else {
-		log.Info("Skipping backup (--no-backup flag specified)")
+		log.Infof("Skipping backup (--no-backup flag specified)")
 	}
 
 	// Restore from backup
@@ -142,25 +142,27 @@ func runRestore(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to restore from backup: %w", err)
 	}
 
-	log.Info("Successfully restored kubeconfig from %s", selectedBackup.Name)
+	log.Infof("Successfully restored kubeconfig from %s", selectedBackup.Name)
 
 	// Clean up backup file after successful restore (unless --keep-backup flag is used)
 	if !keepBackup {
-		log.Debug("Cleaning up backup file: %s", selectedBackup.Path)
+		log.Debugf("Cleaning up backup file: %s", selectedBackup.Path)
 		err = os.Remove(selectedBackup.Path)
 		if err != nil {
-			log.Warn("Failed to remove backup file %s: %v", selectedBackup.Path, err)
-			log.Warn("You may want to manually remove it")
+			log.Warnf("Failed to remove backup file %s: %v", selectedBackup.Path, err)
+			log.Warnf("You may want to manually remove it")
 		} else {
-			log.Info("Removed backup file: %s", selectedBackup.Name)
+			log.Infof("Removed backup file: %s", selectedBackup.Name)
 		}
 	} else {
-		log.Info("Backup file preserved: %s", selectedBackup.Name)
+		log.Infof("Backup file preserved: %s", selectedBackup.Name)
 	}
 
 	return nil
 }
 
+// Backup represents a kubeconfig backup file with metadata about when it was created.
+// It contains the file path, display name, and timestamp information for restore operations.
 type Backup struct {
 	Name    string
 	Path    string
@@ -181,24 +183,26 @@ func findBackups(kubeconfigPath string) ([]Backup, error) {
 	prefix := baseName + ".backup."
 
 	for _, entry := range entries {
-		if !entry.IsDir() && strings.HasPrefix(entry.Name(), prefix) {
-			backupPath := filepath.Join(dir, entry.Name())
-
-			// Extract timestamp from filename
-			timestampStr := strings.TrimPrefix(entry.Name(), prefix)
-			timestamp, err := time.Parse(BackupTimeFormat, timestampStr)
-			if err != nil {
-				continue // Skip files that don't match our backup format
-			}
-
-			backup := Backup{
-				Name:    entry.Name(),
-				Path:    backupPath,
-				Time:    timestamp,
-				TimeStr: timestamp.Format("2006-01-02 15:04:05"),
-			}
-			backups = append(backups, backup)
+		if entry.IsDir() || !strings.HasPrefix(entry.Name(), prefix) {
+			continue
 		}
+
+		backupPath := filepath.Join(dir, entry.Name())
+
+		// Extract timestamp from filename
+		timestampStr := strings.TrimPrefix(entry.Name(), prefix)
+		timestamp, err := time.Parse(BackupTimeFormat, timestampStr)
+		if err != nil {
+			continue // Skip files that don't match our backup format
+		}
+
+		backup := Backup{
+			Name:    entry.Name(),
+			Path:    backupPath,
+			Time:    timestamp,
+			TimeStr: timestamp.Format("2006-01-02 15:04:05"),
+		}
+		backups = append(backups, backup)
 	}
 
 	// Sort backups by time (newest first)
@@ -253,29 +257,29 @@ func confirmRestore(backupName, kubeconfigPath string) bool {
 	return response == "y" || response == "yes"
 }
 
-func shouldCreateBackupBeforeRestore(kubeconfigPath string, backups []Backup, selectedBackup Backup, log *logger.Logger) (bool, string, []string) {
+func shouldCreateBackupBeforeRestore(kubeconfigPath string, _ []Backup, selectedBackup Backup, log *logger.Logger) (shouldBackup bool, reason string, conflicts []string) {
 	// Load current kubeconfig
 	currentConfig, err := kubeconfig.Load(kubeconfigPath)
 	if err != nil {
-		log.Debug("Could not load current kubeconfig: %v", err)
+		log.Debugf("Could not load current kubeconfig: %v", err)
 		return true, "could not load current kubeconfig for analysis", nil
 	}
 
 	// Load backup kubeconfig
 	backupConfig, err := kubeconfig.Load(selectedBackup.Path)
 	if err != nil {
-		log.Debug("Could not load backup kubeconfig: %v", err)
+		log.Debugf("Could not load backup kubeconfig: %v", err)
 		return true, "could not load backup kubeconfig for analysis", nil
 	}
 
 	// Analyze merge conflicts
-	conflicts := analyzeRestoreConflicts(currentConfig, backupConfig, log)
+	conflicts = analyzeRestoreConflicts(currentConfig, backupConfig, log)
 
 	if len(conflicts) == 0 {
 		return false, "no conflicts detected - backup contexts can be safely merged", nil
 	}
 
-	log.Debug("Found %d potential conflicts: %v", len(conflicts), conflicts)
+	log.Debugf("Found %d potential conflicts: %v", len(conflicts), conflicts)
 
 	// Ask user if they want selective backup or full backup
 	choice := askUserAboutConflicts(conflicts)
@@ -300,7 +304,7 @@ func analyzeRestoreConflicts(current, backup *kubeconfig.Config, log *logger.Log
 			// Context exists in both - check if they're different
 			if !contextsEqual(currentContext, backupContext.Context) {
 				conflicts = append(conflicts, fmt.Sprintf("context '%s' (different configuration)", backupContext.Name))
-				log.Debug("Context conflict: %s", backupContext.Name)
+				log.Debugf("Context conflict: %s", backupContext.Name)
 			}
 		}
 	}
@@ -315,7 +319,7 @@ func analyzeRestoreConflicts(current, backup *kubeconfig.Config, log *logger.Log
 		if currentCluster, exists := currentClusters[backupCluster.Name]; exists {
 			if !clustersEqual(currentCluster, backupCluster.Cluster) {
 				conflicts = append(conflicts, fmt.Sprintf("cluster '%s' (different server/auth)", backupCluster.Name))
-				log.Debug("Cluster conflict: %s", backupCluster.Name)
+				log.Debugf("Cluster conflict: %s", backupCluster.Name)
 			}
 		}
 	}
@@ -330,7 +334,7 @@ func analyzeRestoreConflicts(current, backup *kubeconfig.Config, log *logger.Log
 		if currentUser, exists := currentUsers[backupUser.Name]; exists {
 			if !usersEqual(currentUser, backupUser.User) {
 				conflicts = append(conflicts, fmt.Sprintf("user '%s' (different credentials)", backupUser.Name))
-				log.Debug("User conflict: %s", backupUser.Name)
+				log.Debugf("User conflict: %s", backupUser.Name)
 			}
 		}
 	}
@@ -465,7 +469,7 @@ func createSelectiveBackup(kubeconfigPath string, conflicts []string, log *logge
 		return "", fmt.Errorf("failed to save selective backup: %w", err)
 	}
 
-	log.Debug("Created selective backup with %d contexts, %d clusters, %d users",
+	log.Debugf("Created selective backup with %d contexts, %d clusters, %d users",
 		len(selectiveConfig.Contexts), len(selectiveConfig.Clusters), len(selectiveConfig.Users))
 
 	return backupPath, nil
@@ -489,13 +493,13 @@ func extractNameFromConflict(conflict, itemType string) string {
 
 func restoreFromBackup(backupPath, kubeconfigPath string) error {
 	// Read backup file
-	data, err := os.ReadFile(backupPath)
+	data, err := os.ReadFile(backupPath) //nolint:gosec // User-selected backup file path is intentional
 	if err != nil {
 		return fmt.Errorf("failed to read backup file: %w", err)
 	}
 
 	// Write to kubeconfig
-	err = os.WriteFile(kubeconfigPath, data, 0600)
+	err = os.WriteFile(kubeconfigPath, data, 0600) //nolint:mnd // Use 0600 for security (kubeconfig contains credentials)
 	if err != nil {
 		return fmt.Errorf("failed to write kubeconfig: %w", err)
 	}

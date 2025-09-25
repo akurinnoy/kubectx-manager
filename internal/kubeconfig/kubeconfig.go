@@ -16,6 +16,16 @@ import (
 )
 
 const (
+	// File permissions for kubeconfig files (readable/writable by owner only)
+	kubeconfigFileMode = 0600
+	// Timeout values for network operations
+	httpTimeout = 10 * time.Second
+	ctxTimeout  = 5 * time.Second
+	// HTTP status code threshold for success
+	httpSuccessThreshold = 500
+)
+
+const (
 	// BackupTimeFormat is the timestamp format used for backup file names
 	BackupTimeFormat = "20060102-150405"
 )
@@ -34,22 +44,26 @@ type Config struct {
 	Users          []NamedUser            `yaml:"users"`
 }
 
+// NamedContext represents a Kubernetes context with its name.
 type NamedContext struct {
 	Context *Context `yaml:"context"`
 	Name    string   `yaml:"name"`
 }
 
+// Context represents a Kubernetes context configuration.
 type Context struct {
 	Cluster   string `yaml:"cluster"`
 	User      string `yaml:"user"`
 	Namespace string `yaml:"namespace,omitempty"`
 }
 
+// NamedCluster represents a Kubernetes cluster configuration with its name.
 type NamedCluster struct {
 	Cluster *Cluster `yaml:"cluster"`
 	Name    string   `yaml:"name"`
 }
 
+// Cluster represents a Kubernetes cluster connection configuration.
 type Cluster struct {
 	Server                   string `yaml:"server"`
 	CertificateAuthorityData string `yaml:"certificate-authority-data,omitempty"`
@@ -57,11 +71,13 @@ type Cluster struct {
 	InsecureSkipTLSVerify    bool   `yaml:"insecure-skip-tls-verify,omitempty"`
 }
 
+// NamedUser represents a Kubernetes user with its name.
 type NamedUser struct {
 	User *User  `yaml:"user"`
 	Name string `yaml:"name"`
 }
 
+// User represents a Kubernetes user authentication configuration.
 type User struct {
 	AuthProvider          *AuthProvider          `yaml:"auth-provider,omitempty"`
 	Exec                  *ExecConfig            `yaml:"exec,omitempty"`
@@ -75,11 +91,13 @@ type User struct {
 	Password              string                 `yaml:"password,omitempty"`
 }
 
+// AuthProvider represents an authentication provider configuration.
 type AuthProvider struct {
 	Config map[string]string `yaml:"config,omitempty"`
 	Name   string            `yaml:"name"`
 }
 
+// ExecConfig represents an exec-based authentication configuration.
 type ExecConfig struct {
 	APIVersion string       `yaml:"apiVersion"`
 	Command    string       `yaml:"command"`
@@ -87,6 +105,8 @@ type ExecConfig struct {
 	Env        []ExecEnvVar `yaml:"env,omitempty"`
 }
 
+// ExecEnvVar represents an environment variable used in exec-based authentication.
+// It contains a name-value pair that will be set when executing the auth command.
 type ExecEnvVar struct {
 	Name  string `yaml:"name"`
 	Value string `yaml:"value"`
@@ -94,7 +114,7 @@ type ExecEnvVar struct {
 
 // Load reads and parses a kubeconfig file
 func Load(path string) (*Config, error) {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) //nolint:gosec // User-specified kubeconfig path is intentional
 	if err != nil {
 		return nil, fmt.Errorf("failed to read kubeconfig file: %w", err)
 	}
@@ -161,7 +181,7 @@ func Save(config *Config, path string) error {
 		return fmt.Errorf("failed to marshal kubeconfig: %w", err)
 	}
 
-	return os.WriteFile(path, data, 0600)
+	return os.WriteFile(path, data, kubeconfigFileMode)
 }
 
 // CreateBackup creates a backup of the kubeconfig file
@@ -169,24 +189,20 @@ func CreateBackup(path string) (string, error) {
 	timestamp := time.Now().Format(BackupTimeFormat)
 	backupPath := path + ".backup." + timestamp
 
-	src, err := os.Open(path)
+	src, err := os.Open(path) //nolint:gosec // User-specified backup path is intentional
 	if err != nil {
 		return "", fmt.Errorf("failed to open source file: %w", err)
 	}
 	defer func() {
-		if closeErr := src.Close(); closeErr != nil {
-			// Log error if needed, but don't fail the operation
-		}
+		_ = src.Close() //nolint:errcheck // Best effort close, error handling not critical here
 	}()
 
-	dst, err := os.Create(backupPath)
+	dst, err := os.Create(backupPath) //nolint:gosec // Backup file creation is intentional
 	if err != nil {
 		return "", fmt.Errorf("failed to create backup file: %w", err)
 	}
 	defer func() {
-		if closeErr := dst.Close(); closeErr != nil {
-			// Log error if needed, but don't fail the operation
-		}
+		_ = dst.Close() //nolint:errcheck // Best effort close, error handling not critical here
 	}()
 
 	_, err = io.Copy(dst, src)
@@ -218,11 +234,9 @@ func RemoveContexts(config *Config, contextsToRemove []string) error {
 				usedClusters[namedContext.Context.Cluster] = true
 				usedUsers[namedContext.Context.User] = true
 			}
-		} else {
+		} else if config.CurrentContext == namedContext.Name {
 			// Update current-context if needed
-			if config.CurrentContext == namedContext.Name {
-				config.CurrentContext = ""
-			}
+			config.CurrentContext = ""
 		}
 	}
 	config.Contexts = remainingContexts
@@ -304,7 +318,7 @@ func hasValidCredentials(user *User) bool {
 
 	// Check for auth provider (like OIDC, GCP, AWS, etc.)
 	if user.AuthProvider != nil {
-		return user.AuthProvider.Config != nil && len(user.AuthProvider.Config) > 0
+		return len(user.AuthProvider.Config) > 0
 	}
 
 	// Check for exec-based auth (like kubectl plugins)
@@ -330,9 +344,10 @@ func isClusterReachable(cluster *Cluster, user *User) bool {
 
 	// Create HTTP client with appropriate TLS settings
 	client := &http.Client{
-		Timeout: 10 * time.Second,
+		Timeout: httpTimeout,
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
+				//nolint:gosec // TLS verification controlled by kubeconfig setting
 				InsecureSkipVerify: cluster.InsecureSkipTLSVerify,
 			},
 		},
@@ -341,7 +356,7 @@ func isClusterReachable(cluster *Cluster, user *User) bool {
 	// Try to reach the /version endpoint (doesn't require auth)
 	versionURL := cluster.Server + "/version"
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(ctx, "GET", versionURL, http.NoBody)
@@ -361,14 +376,12 @@ func isClusterReachable(cluster *Cluster, user *User) bool {
 		return false
 	}
 	defer func() {
-		if closeErr := resp.Body.Close(); closeErr != nil {
-			// Log error if needed, but don't fail the operation
-		}
+		_ = resp.Body.Close() //nolint:errcheck // Best effort close, error handling not critical here
 	}()
 
 	// If we get any response (even 401/403), the cluster is reachable
 	// Status codes in the 200-499 range indicate the server is responding
-	return resp.StatusCode < 500
+	return resp.StatusCode < httpSuccessThreshold
 }
 
 // GetCluster returns a cluster by name (needed for the enhanced auth check)
