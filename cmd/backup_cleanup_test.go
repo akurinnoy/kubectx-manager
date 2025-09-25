@@ -131,7 +131,7 @@ func TestKeepBackupFlagFunctionality(t *testing.T) {
 	flag := cmd.Flags().Lookup("keep-backup")
 
 	if flag == nil {
-		t.Error("--keep-backup flag should be defined")
+		t.Fatal("--keep-backup flag should be defined")
 	}
 
 	if flag.DefValue != "false" {

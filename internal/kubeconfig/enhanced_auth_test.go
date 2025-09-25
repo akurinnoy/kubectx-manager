@@ -186,7 +186,7 @@ func TestGetCluster(t *testing.T) {
 	// Test existing cluster
 	cluster := config.GetCluster("test-cluster")
 	if cluster == nil {
-		t.Error("Expected to find cluster, got nil")
+		t.Fatal("Expected to find cluster, got nil")
 	}
 	if cluster.Server != "https://test.com" {
 		t.Errorf("Expected server 'https://test.com', got %s", cluster.Server)

@@ -16,6 +16,16 @@ import (
 )
 
 const (
+	// File permissions for kubeconfig files (readable/writable by owner only)
+	kubeconfigFileMode = 0600
+	// Timeout values for network operations
+	httpTimeout = 10 * time.Second
+	ctxTimeout  = 5 * time.Second
+	// HTTP status code threshold for success
+	httpSuccessThreshold = 500
+)
+
+const (
 	// BackupTimeFormat is the timestamp format used for backup file names
 	BackupTimeFormat = "20060102-150405"
 )
@@ -104,7 +114,7 @@ type ExecEnvVar struct {
 
 // Load reads and parses a kubeconfig file
 func Load(path string) (*Config, error) {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) //nolint:gosec // User-specified kubeconfig path is intentional
 	if err != nil {
 		return nil, fmt.Errorf("failed to read kubeconfig file: %w", err)
 	}
@@ -171,7 +181,7 @@ func Save(config *Config, path string) error {
 		return fmt.Errorf("failed to marshal kubeconfig: %w", err)
 	}
 
-	return os.WriteFile(path, data, 0600)
+	return os.WriteFile(path, data, kubeconfigFileMode)
 }
 
 // CreateBackup creates a backup of the kubeconfig file
@@ -179,7 +189,7 @@ func CreateBackup(path string) (string, error) {
 	timestamp := time.Now().Format(BackupTimeFormat)
 	backupPath := path + ".backup." + timestamp
 
-	src, err := os.Open(path)
+	src, err := os.Open(path) //nolint:gosec // User-specified backup path is intentional
 	if err != nil {
 		return "", fmt.Errorf("failed to open source file: %w", err)
 	}
@@ -187,7 +197,7 @@ func CreateBackup(path string) (string, error) {
 		_ = src.Close() //nolint:errcheck // Best effort close, error handling not critical here
 	}()
 
-	dst, err := os.Create(backupPath)
+	dst, err := os.Create(backupPath) //nolint:gosec // Backup file creation is intentional
 	if err != nil {
 		return "", fmt.Errorf("failed to create backup file: %w", err)
 	}
@@ -334,9 +344,10 @@ func isClusterReachable(cluster *Cluster, user *User) bool {
 
 	// Create HTTP client with appropriate TLS settings
 	client := &http.Client{
-		Timeout: 10 * time.Second,
+		Timeout: httpTimeout,
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
+				//nolint:gosec // TLS verification controlled by kubeconfig setting
 				InsecureSkipVerify: cluster.InsecureSkipTLSVerify,
 			},
 		},
@@ -345,7 +356,7 @@ func isClusterReachable(cluster *Cluster, user *User) bool {
 	// Try to reach the /version endpoint (doesn't require auth)
 	versionURL := cluster.Server + "/version"
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(ctx, "GET", versionURL, http.NoBody)
@@ -370,7 +381,7 @@ func isClusterReachable(cluster *Cluster, user *User) bool {
 
 	// If we get any response (even 401/403), the cluster is reachable
 	// Status codes in the 200-499 range indicate the server is responding
-	return resp.StatusCode < 500
+	return resp.StatusCode < httpSuccessThreshold
 }
 
 // GetCluster returns a cluster by name (needed for the enhanced auth check)

@@ -493,13 +493,13 @@ func extractNameFromConflict(conflict, itemType string) string {
 
 func restoreFromBackup(backupPath, kubeconfigPath string) error {
 	// Read backup file
-	data, err := os.ReadFile(backupPath)
+	data, err := os.ReadFile(backupPath) //nolint:gosec // User-selected backup file path is intentional
 	if err != nil {
 		return fmt.Errorf("failed to read backup file: %w", err)
 	}
 
 	// Write to kubeconfig
-	err = os.WriteFile(kubeconfigPath, data, 0600)
+	err = os.WriteFile(kubeconfigPath, data, 0600) //nolint:mnd // Use 0600 for security (kubeconfig contains credentials)
 	if err != nil {
 		return fmt.Errorf("failed to write kubeconfig: %w", err)
 	}

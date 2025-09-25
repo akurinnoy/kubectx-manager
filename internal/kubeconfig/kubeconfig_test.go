@@ -163,7 +163,7 @@ func TestGetContext(t *testing.T) {
 	// Test existing context
 	ctx := cfg.GetContext("test-context")
 	if ctx == nil {
-		t.Errorf("Expected to find context, got nil")
+		t.Fatalf("Expected to find context, got nil")
 	}
 	if ctx.Cluster != "test-cluster" {
 		t.Errorf("Expected cluster 'test-cluster', got %s", ctx.Cluster)
