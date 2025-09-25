@@ -1,0 +1,140 @@
+# GoReleaser configuration for kubectx-manager
+project_name: kubectx-manager
+
+# Build configuration
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    # Build flags for version information
+    ldflags:
+      - -s -w
+      - -X github.com/akurinnoy/kubectx-manager/cmd.Version={{.Version}}
+      - -X github.com/akurinnoy/kubectx-manager/cmd.GitCommit={{.Commit}}
+      - -X github.com/akurinnoy/kubectx-manager/cmd.BuildDate={{.Date}}
+    # Binary naming
+    binary: kubectx-manager
+
+# Archive configuration
+archives:
+  - format: tar.gz
+    # Windows archives should use zip
+    format_overrides:
+      - goos: windows
+        format: zip
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - README.md
+      - LICENSE*
+
+# Checksum configuration
+checksum:
+  name_template: '{{ .ProjectName }}_{{ .Version }}_checksums.txt'
+
+# Changelog configuration
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^ci:'
+      - '^chore:'
+      - '^style:'
+      - Merge pull request
+      - Merge remote-tracking branch
+      - Merge branch
+  groups:
+    - title: 'New Features'
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: 'Bug Fixes'
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: 'Performance Improvements'
+      regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
+      order: 2
+    - title: 'Others'
+      order: 999
+
+# GitHub Release configuration
+release:
+  # Repo to push to (will be inferred from .git/config)
+  github:
+    owner: akurinnoy
+    name: kubectx-manager
+  
+  # Create release as draft
+  draft: false
+  
+  # Mark as prerelease for versions like v0.x.x
+  prerelease: auto
+  
+  # Release name template
+  name_template: "kubectx-manager {{.Version}}"
+  
+  # Release notes
+  header: |
+    ## kubectx-manager {{.Version}}
+    
+    Welcome to this new release of kubectx-manager!
+  
+  footer: |
+    ## Installation
+    
+    ### Download Binary
+    1. Download the appropriate binary for your platform from the assets above
+    2. Extract the archive: `tar -xzf kubectx-manager_*_*.tar.gz` (or unzip for Windows)
+    3. Move binary to your PATH: `sudo mv kubectx-manager /usr/local/bin/`
+    4. Verify installation: `kubectx-manager version`
+    
+    ### Verify Checksums (Recommended)
+    ```bash
+    # Download checksums file and verify
+    shasum -a 256 -c kubectx-manager_{{.Version}}_checksums.txt
+    ```
+    
+    ---
+    
+    **Full Changelog**: https://github.com/akurinnoy/kubectx-manager/compare/{{.PreviousTag}}...{{.Tag}}
+
+# Homebrew tap configuration (disabled for initial releases)
+# Uncomment and configure when you're ready for Homebrew distribution
+# brews:
+#   - # Repository to push to (same repo for simplicity)
+#     tap:
+#       owner: akurinnoy
+#       name: kubectx-manager
+#     
+#     # Formula name
+#     name: kubectx-manager
+#     
+#     # Formula description
+#     description: "Advanced Kubernetes context management tool"
+#     
+#     # Homepage
+#     homepage: "https://github.com/akurinnoy/kubectx-manager"
+#     
+#     # License
+#     license: "EPL-2.0"
+#     
+#     # Install section
+#     install: |
+#       bin.install "kubectx-manager"
+#     
+#     # Test section
+#     test: |
+#       system "#{bin}/kubectx-manager", "version"
+
+# Validation
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
