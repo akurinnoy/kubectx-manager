@@ -77,8 +77,8 @@ func TestRestoreCleanupLogic(t *testing.T) {
 				captureLogger.Debugf("Cleaning up backup file: %s", selectedBackup.Path)
 				err = os.Remove(selectedBackup.Path)
 				if err != nil {
-					captureLogger.Warn("Failed to remove backup file %s: %v", selectedBackup.Path, err)
-					captureLogger.Warn("You may want to manually remove it")
+					captureLogger.Warnf("Failed to remove backup file %s: %v", selectedBackup.Path, err)
+					captureLogger.Warnf("You may want to manually remove it")
 				} else {
 					captureLogger.Infof("Removed backup file: %s", selectedBackup.Name)
 				}
@@ -122,11 +122,11 @@ func (l *CapturingLogger) Infof(format string, args ...interface{}) {
 	l.entries = append(l.entries, fmt.Sprintf("[INFO] "+format, args...))
 }
 
-func (l *CapturingLogger) Warn(format string, args ...interface{}) {
+func (l *CapturingLogger) Warnf(format string, args ...interface{}) {
 	l.entries = append(l.entries, fmt.Sprintf("[WARN] "+format, args...))
 }
 
-func (l *CapturingLogger) Error(format string, args ...interface{}) {
+func (l *CapturingLogger) Errorf(format string, args ...interface{}) {
 	l.entries = append(l.entries, fmt.Sprintf("[ERROR] "+format, args...))
 }
 
@@ -192,8 +192,8 @@ func TestBackupCleanupWithPermissionError(t *testing.T) {
 		captureLogger.Debugf("Cleaning up backup file: %s", selectedBackup.Path)
 		err = os.Remove(selectedBackup.Path)
 		if err != nil {
-			captureLogger.Warn("Failed to remove backup file %s: %v", selectedBackup.Path, err)
-			captureLogger.Warn("You may want to manually remove it")
+			captureLogger.Warnf("Failed to remove backup file %s: %v", selectedBackup.Path, err)
+			captureLogger.Warnf("You may want to manually remove it")
 		} else {
 			captureLogger.Infof("Removed backup file: %s", selectedBackup.Name)
 		}

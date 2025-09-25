@@ -37,6 +37,8 @@ It features advanced pattern matching, authentication validation, cluster reacha
 	RunE: runCleanup,
 }
 
+// Execute runs the root command and handles all CLI operations.
+// It sets up the CLI interface and executes the appropriate subcommands.
 func Execute() error {
 	return rootCmd.Execute()
 }
@@ -65,27 +67,27 @@ func init() { //nolint:gochecknoinits // Cobra CLI flag setup requires init
 	rootCmd.AddCommand(versionCmd)
 }
 
-func runCleanup(cmd *cobra.Command, args []string) error {
+func runCleanup(_ *cobra.Command, _ []string) error {
 	// Initialize logger
 	log := logger.New(verbose, quiet)
 
-	log.Debug("Starting kubectx-manager...")
-	log.Debug("Config file: %s", configFile)
-	log.Debug("Kubeconfig file: %s", kubeConfig)
+	log.Debugf("Starting kubectx-manager...")
+	log.Debugf("Config file: %s", configFile)
+	log.Debugf("Kubeconfig file: %s", kubeConfig)
 
 	// Load configuration
 	cfg, err := config.Load(configFile)
 	if err != nil {
 		return fmt.Errorf("failed to load configuration: %w", err)
 	}
-	log.Debug("Loaded configuration with %d whitelist patterns", len(cfg.Whitelist))
+	log.Debugf("Loaded configuration with %d whitelist patterns", len(cfg.Whitelist))
 
 	// Load kubeconfig
 	kConfig, err := kubeconfig.Load(kubeConfig)
 	if err != nil {
 		return fmt.Errorf("failed to load kubeconfig: %w", err)
 	}
-	log.Debug("Loaded kubeconfig with %d contexts", len(kConfig.Contexts))
+	log.Debugf("Loaded kubeconfig with %d contexts", len(kConfig.Contexts))
 
 	// Create backup before modifications
 	if !dryRun {
@@ -93,32 +95,32 @@ func runCleanup(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return fmt.Errorf("failed to create backup: %w", err)
 		}
-		log.Info("Created backup at: %s", backupPath)
+		log.Infof("Created backup at: %s", backupPath)
 	}
 
 	// Find contexts to remove
 	contextsToRemove := findContextsToRemove(kConfig, cfg, log)
 
 	if len(contextsToRemove) == 0 {
-		log.Info("No contexts to remove")
+		log.Infof("No contexts to remove")
 		return nil
 	}
 
 	// Display what will be removed
-	log.Info("Contexts to remove:")
+	log.Infof("Contexts to remove:")
 	for _, ctx := range contextsToRemove {
-		log.Info("  - %s", ctx)
+		log.Infof("  - %s", ctx)
 	}
 
 	if dryRun {
-		log.Info("Dry run mode - no changes made")
+		log.Infof("Dry run mode - no changes made")
 		return nil
 	}
 
 	// Confirm with user if interactive mode is enabled
 	if interactive {
 		if !confirmRemoval(contextsToRemove) {
-			log.Info("Operation canceled by user")
+			log.Infof("Operation canceled by user")
 			return nil
 		}
 	}
@@ -135,7 +137,7 @@ func runCleanup(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to save kubeconfig: %w", err)
 	}
 
-	log.Info("Successfully removed %d contexts", len(contextsToRemove))
+	log.Infof("Successfully removed %d contexts", len(contextsToRemove))
 	return nil
 }
 
@@ -145,17 +147,17 @@ func findContextsToRemove(kConfig *kubeconfig.Config, cfg *config.Config, log *l
 	for _, contextName := range kConfig.GetContextNames() {
 		// Check if context matches whitelist patterns
 		if cfg.MatchesWhitelist(contextName) {
-			log.Debug("Context '%s' matches whitelist, keeping", contextName)
+			log.Debugf("Context '%s' matches whitelist, keeping", contextName)
 			continue
 		}
 
 		// If auth-check is enabled, check authentication status
 		if authCheck {
 			if kubeconfig.IsAuthValid(kConfig, contextName) {
-				log.Debug("Context '%s' has valid auth, keeping", contextName)
+				log.Debugf("Context '%s' has valid auth, keeping", contextName)
 				continue
 			}
-			log.Debug("Context '%s' has invalid auth, marking for removal", contextName)
+			log.Debugf("Context '%s' has invalid auth, marking for removal", contextName)
 		}
 
 		toRemove = append(toRemove, contextName)

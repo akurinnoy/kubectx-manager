@@ -21,6 +21,12 @@ func TestRootCommand(t *testing.T) {
 	if cmd.Use != "kubectx-manager" {
 		t.Errorf("Expected command name 'kubectx-manager', got %s", cmd.Use)
 	}
+	if cmd.Short != "Clean up Kubernetes contexts from your kubeconfig" {
+		t.Errorf("Expected command short description, got %s", cmd.Short)
+	}
+	if cmd.RunE == nil {
+		t.Error("Expected RunE function to be set")
+	}
 }
 
 func TestFindContextsToRemove(t *testing.T) {

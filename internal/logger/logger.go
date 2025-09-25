@@ -24,30 +24,32 @@ func New(verbose, quiet bool) *Logger {
 	}
 }
 
-// Debug outputs debug-level messages when verbose mode is enabled.
+// Debugf outputs debug-level messages when verbose mode is enabled.
 // Debug messages are only shown if verbose=true and quiet=false.
-func (l *Logger) Debug(format string, args ...interface{}) {
+func (l *Logger) Debugf(format string, args ...interface{}) {
 	if l.verbose && !l.quiet {
 		fmt.Fprintf(os.Stderr, "[DEBUG] "+format+"\n", args...)
 	}
 }
 
-// Info outputs informational messages unless quiet mode is enabled.
+// Infof outputs informational messages unless quiet mode is enabled.
 // Info messages are shown unless quiet=true.
-func (l *Logger) Info(format string, args ...interface{}) {
+func (l *Logger) Infof(format string, args ...interface{}) {
 	if !l.quiet {
 		fmt.Printf(format+"\n", args...)
 	}
 }
 
-// Warn outputs warning messages unless quiet mode is enabled.
+// Warnf outputs warning messages unless quiet mode is enabled.
 // Warning messages are shown unless quiet=true.
-func (l *Logger) Warn(format string, args ...interface{}) {
+func (l *Logger) Warnf(format string, args ...interface{}) {
 	if !l.quiet {
 		fmt.Fprintf(os.Stderr, "[WARN] "+format+"\n", args...)
 	}
 }
 
-func (l *Logger) Error(format string, args ...interface{}) {
+// Errorf outputs error messages that are always shown regardless of quiet mode.
+// Error messages cannot be suppressed as they indicate critical issues.
+func (l *Logger) Errorf(format string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, "[ERROR] "+format+"\n", args...)
 }

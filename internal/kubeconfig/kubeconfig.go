@@ -95,6 +95,8 @@ type ExecConfig struct {
 	Env        []ExecEnvVar `yaml:"env,omitempty"`
 }
 
+// ExecEnvVar represents an environment variable used in exec-based authentication.
+// It contains a name-value pair that will be set when executing the auth command.
 type ExecEnvVar struct {
 	Name  string `yaml:"name"`
 	Value string `yaml:"value"`
@@ -182,9 +184,7 @@ func CreateBackup(path string) (string, error) {
 		return "", fmt.Errorf("failed to open source file: %w", err)
 	}
 	defer func() {
-		if closeErr := src.Close(); closeErr != nil {
-			// Log error if needed, but don't fail the operation
-		}
+		_ = src.Close() //nolint:errcheck // Best effort close, error handling not critical here
 	}()
 
 	dst, err := os.Create(backupPath)
@@ -192,9 +192,7 @@ func CreateBackup(path string) (string, error) {
 		return "", fmt.Errorf("failed to create backup file: %w", err)
 	}
 	defer func() {
-		if closeErr := dst.Close(); closeErr != nil {
-			// Log error if needed, but don't fail the operation
-		}
+		_ = dst.Close() //nolint:errcheck // Best effort close, error handling not critical here
 	}()
 
 	_, err = io.Copy(dst, src)
@@ -310,7 +308,7 @@ func hasValidCredentials(user *User) bool {
 
 	// Check for auth provider (like OIDC, GCP, AWS, etc.)
 	if user.AuthProvider != nil {
-		return user.AuthProvider.Config != nil && len(user.AuthProvider.Config) > 0
+		return len(user.AuthProvider.Config) > 0
 	}
 
 	// Check for exec-based auth (like kubectl plugins)
@@ -367,9 +365,7 @@ func isClusterReachable(cluster *Cluster, user *User) bool {
 		return false
 	}
 	defer func() {
-		if closeErr := resp.Body.Close(); closeErr != nil {
-			// Log error if needed, but don't fail the operation
-		}
+		_ = resp.Body.Close() //nolint:errcheck // Best effort close, error handling not critical here
 	}()
 
 	// If we get any response (even 401/403), the cluster is reachable
