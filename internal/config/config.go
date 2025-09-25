@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+// Config represents the configuration for kubectx-manager.
+// It contains whitelist patterns used to match contexts that should be ignored during cleanup.
 type Config struct {
 	Whitelist []string `yaml:"whitelist"`
 	patterns  []*regexp.Regexp
@@ -34,9 +36,7 @@ func Load(configPath string) (*Config, error) {
 		return nil, fmt.Errorf("failed to open config file: %w", err)
 	}
 	defer func() {
-		if closeErr := file.Close(); closeErr != nil {
-			// Log error if needed, but don't fail the operation
-		}
+		_ = file.Close() // nolint:errcheck // Best effort close, error handling not critical here
 	}()
 
 	scanner := bufio.NewScanner(file)

@@ -34,11 +34,13 @@ type Config struct {
 	Users          []NamedUser            `yaml:"users"`
 }
 
+// NamedContext represents a Kubernetes context with its name.
 type NamedContext struct {
 	Context *Context `yaml:"context"`
 	Name    string   `yaml:"name"`
 }
 
+// Context represents a Kubernetes context configuration.
 type Context struct {
 	Cluster   string `yaml:"cluster"`
 	User      string `yaml:"user"`
