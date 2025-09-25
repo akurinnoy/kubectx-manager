@@ -42,7 +42,10 @@ func Load(configPath string) (*Config, error) {
 		return nil, fmt.Errorf("failed to open config file: %w", err)
 	}
 	defer func() {
-		_ = file.Close() //nolint:errcheck // Best effort close, error handling not critical here
+		if closeErr := file.Close(); closeErr != nil {
+			// Log the error, but don't override the main return error
+			fmt.Fprintf(os.Stderr, "Warning: failed to close config file: %v\n", closeErr)
+		}
 	}()
 
 	scanner := bufio.NewScanner(file)
