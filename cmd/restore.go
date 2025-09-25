@@ -273,7 +273,7 @@ func shouldCreateBackupBeforeRestore(kubeconfigPath string, _ []Backup, selected
 	}
 
 	// Analyze merge conflicts
-	conflicts := analyzeRestoreConflicts(currentConfig, backupConfig, log)
+	conflicts = analyzeRestoreConflicts(currentConfig, backupConfig, log)
 
 	if len(conflicts) == 0 {
 		return false, "no conflicts detected - backup contexts can be safely merged", nil
