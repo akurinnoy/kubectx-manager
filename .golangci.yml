@@ -1,10 +1,17 @@
+version: 2
+
 run:
   timeout: 5m
   issues-exit-code: 1
   tests: true
   modules-download-mode: readonly
 
-# output: using defaults to maintain v1/v2 compatibility
+output:
+  formats:
+    - format: colored-line-number
+      path: stdout
+  print-issued-lines: true
+  print-linter-name: true
 
 linters-settings:
   errcheck:
