@@ -194,7 +194,9 @@ func CreateBackup(path string) (string, error) {
 		return "", fmt.Errorf("failed to open source file: %w", err)
 	}
 	defer func() {
-		_ = src.Close() //nolint:errcheck // Best effort close, error handling not critical here
+		if closeErr := src.Close(); closeErr != nil {
+			fmt.Fprintf(os.Stderr, "Warning: failed to close source file: %v\n", closeErr)
+		}
 	}()
 
 	dst, err := os.Create(backupPath) //nolint:gosec // Backup file creation is intentional
@@ -202,7 +204,9 @@ func CreateBackup(path string) (string, error) {
 		return "", fmt.Errorf("failed to create backup file: %w", err)
 	}
 	defer func() {
-		_ = dst.Close() //nolint:errcheck // Best effort close, error handling not critical here
+		if closeErr := dst.Close(); closeErr != nil {
+			fmt.Fprintf(os.Stderr, "Warning: failed to close destination file: %v\n", closeErr)
+		}
 	}()
 
 	_, err = io.Copy(dst, src)
@@ -376,7 +380,9 @@ func isClusterReachable(cluster *Cluster, user *User) bool {
 		return false
 	}
 	defer func() {
-		_ = resp.Body.Close() //nolint:errcheck // Best effort close, error handling not critical here
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			fmt.Fprintf(os.Stderr, "Warning: failed to close response body: %v\n", closeErr)
+		}
 	}()
 
 	// If we get any response (even 401/403), the cluster is reachable

@@ -4,6 +4,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -106,14 +107,14 @@ users:
 
 	// Build the binary
 	binaryPath := filepath.Join(tmpDir, "kubectx-manager")
-	cmd := exec.Command("go", "build", "-o", binaryPath)
+	cmd := exec.CommandContext(context.Background(), "go", "build", "-o", binaryPath)
 	err = cmd.Run()
 	if err != nil {
 		t.Fatalf("Failed to build binary: %v", err)
 	}
 
 	// Run dry-run test
-	cmd = exec.Command(binaryPath, "--dry-run", "--verbose",
+	cmd = exec.CommandContext(context.Background(), binaryPath, "--dry-run", "--verbose",
 		"--config", configPath, "--kubeconfig", kubeconfigPath)
 
 	var output bytes.Buffer
@@ -230,14 +231,14 @@ users:
 
 	// Build the binary
 	binaryPath := filepath.Join(tmpDir, "kubectx-manager")
-	cmd := exec.Command("go", "build", "-o", binaryPath)
+	cmd := exec.CommandContext(context.Background(), "go", "build", "-o", binaryPath)
 	err = cmd.Run()
 	if err != nil {
 		t.Fatalf("Failed to build binary: %v", err)
 	}
 
 	// Run actual cleanup (non-interactive by default)
-	cmd = exec.Command(binaryPath, "--config", configPath, "--kubeconfig", kubeconfigPath)
+	cmd = exec.CommandContext(context.Background(), binaryPath, "--config", configPath, "--kubeconfig", kubeconfigPath)
 
 	var output bytes.Buffer
 	cmd.Stdout = &output
@@ -357,14 +358,14 @@ users:
 
 	// Build the binary
 	binaryPath := filepath.Join(tmpDir, "kubectx-manager")
-	cmd := exec.Command("go", "build", "-o", binaryPath)
+	cmd := exec.CommandContext(context.Background(), "go", "build", "-o", binaryPath)
 	err = cmd.Run()
 	if err != nil {
 		t.Fatalf("Failed to build binary: %v", err)
 	}
 
 	// Test restore command (just list backups)
-	cmd = exec.Command(binaryPath, "restore", "--kubeconfig", kubeconfigPath)
+	cmd = exec.CommandContext(context.Background(), binaryPath, "restore", "--kubeconfig", kubeconfigPath)
 
 	// Provide input to cancel the restore
 	cmd.Stdin = strings.NewReader("0\n")
@@ -451,14 +452,14 @@ users:
 
 	// Build the binary
 	binaryPath := filepath.Join(tmpDir, "kubectx-manager")
-	cmd := exec.Command("go", "build", "-o", binaryPath)
+	cmd := exec.CommandContext(context.Background(), "go", "build", "-o", binaryPath)
 	err = cmd.Run()
 	if err != nil {
 		t.Fatalf("Failed to build binary: %v", err)
 	}
 
 	// Run with auth-check flag
-	cmd = exec.Command(binaryPath, "--auth-check", "--dry-run", "--verbose",
+	cmd = exec.CommandContext(context.Background(), binaryPath, "--auth-check", "--dry-run", "--verbose",
 		"--config", configPath, "--kubeconfig", kubeconfigPath)
 
 	var output bytes.Buffer
@@ -520,14 +521,14 @@ users:
 
 	// Build binary
 	binaryPath := filepath.Join(tmpDir, "kubectx-manager")
-	cmd := exec.Command("go", "build", "-o", binaryPath)
+	cmd := exec.CommandContext(context.Background(), "go", "build", "-o", binaryPath)
 	err = cmd.Run()
 	if err != nil {
 		t.Fatalf("Failed to build binary: %v", err)
 	}
 
 	// Run in quiet mode
-	cmd = exec.Command(binaryPath, "--quiet", "--dry-run",
+	cmd = exec.CommandContext(context.Background(), binaryPath, "--quiet", "--dry-run",
 		"--config", configPath, "--kubeconfig", kubeconfigPath)
 
 	var output bytes.Buffer

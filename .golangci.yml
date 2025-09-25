@@ -1,4 +1,4 @@
-version: 2
+version: "2"
 
 run:
   timeout: 5m
@@ -8,65 +8,63 @@ run:
 
 # output: removed for v2.5.0 compatibility - using defaults
 
-linters-settings:
-  errcheck:
-    check-type-assertions: true
-    check-blank: true
-
-  govet:
-    enable-all: true
-    
-  shadow:
-    strict: true
-
-
-  # golint: deprecated, replaced by revive
-  revive:
-    confidence: 0.8
-
-  goconst:
-    min-len: 3
-    min-occurrences: 3
-
-  misspell:
-    locale: US
-
-  unparam:
-    check-exported: false
-
-  unused:
-    check-exported: false
-
-  gosec:
-    excludes:
-      - G204 # Subprocess launched with variable
-      - G301 # Poor file permissions used when creating a directory
-      - G302 # Poor file permissions used when creation file or using chmod
-      - G306 # Poor file permissions used when writing to a file
-
-  lll:
-    line-length: 120
-
-  # maligned: deprecated linter, removed
-
-  dupl:
-    threshold: 100
-
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - experimental
-      - opinionated
-      - performance
-      - style
-    disabled-checks:
-      - dupImport
-      - ifElseChain
-      - octalLiteral
-      - whyNoLint
-      - wrapperFunc
-
 linters:
+  settings:
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
+
+    govet:
+      enable-all: true
+      enable:
+        - shadow
+
+    # golint: deprecated, replaced by revive
+    revive:
+      confidence: 0.8
+
+    goconst:
+      min-len: 3
+      min-occurrences: 3
+
+    misspell:
+      locale: US
+
+    unparam:
+      check-exported: false
+
+    unused:
+      exported-fields-are-used: false
+
+    gosec:
+      excludes:
+        - G204 # Subprocess launched with variable
+        - G301 # Poor file permissions used when creating a directory
+        - G302 # Poor file permissions used when creation file or using chmod
+        - G306 # Poor file permissions used when writing to a file
+
+    lll:
+      line-length: 120
+
+    # maligned: deprecated linter, removed
+
+    dupl:
+      threshold: 100
+
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - experimental
+        - opinionated
+        - performance
+        - style
+      disabled-checks:
+        - dupImport
+        - ifElseChain
+        - octalLiteral
+        - whyNoLint
+        - wrapperFunc
+
   enable:
     - bodyclose
     - dogsled
@@ -114,35 +112,31 @@ linters:
   # - maligned (removed from golangci-lint)
   # - mnd (renamed to mnd)
 
+  exclusions:
+    rules:
+      # Exclude some linters from running on tests files.
+      - path: _test\.go
+        linters:
+          - gocyclo
+          - errcheck
+          - dupl
+          - gosec
+          - funlen
+          - goconst
+          - mnd
+
+      # Exclude known linters from partially hard-to-fix issues
+      - path: cmd/
+        linters:
+          - lll
+          - funlen
+
+      # Exclude shadow checking on the variable named err
+      - text: "shadow: declaration of \"err\""
+        linters:
+          - govet
+
 issues:
-  exclude-rules:
-    # Exclude some linters from running on tests files.
-    - path: _test\.go
-      linters:
-        - gocyclo
-        - errcheck
-        - dupl
-        - gosec
-        - funlen
-        - goconst
-        - mnd
-
-    # Exclude known linters from partially hard-to-fix issues
-    - path: cmd/
-      linters:
-        - lll
-        - funlen
-
-    # Exclude shadow checking on the variable named err
-    - text: "shadow: declaration of \"err\""
-      linters:
-        - govet
-
-  # Independently from option `exclude` we use default exclude patterns,
-  # it can be disabled by this option. To list all
-  # excluded by default patterns execute `golangci-lint run --help`.
-  exclude-use-default: false
-
   # Maximum issues count per one linter. Set to 0 to disable. Default is 50.
   max-issues-per-linter: 0
 
