@@ -11,6 +11,11 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     
+    # Required permissions for golangci-lint-action
+    permissions:
+      contents: read
+      pull-requests: read  # Required for only-new-issues option
+    
     steps:
     - name: Check out code
       uses: actions/checkout@v5.0.0
@@ -50,9 +55,10 @@ jobs:
     - name: Run golangci-lint
       uses: golangci/golangci-lint-action@v8.0.0
       with:
-        version: latest
+        version: v1.61.0  # Pin to specific version for reproducibility
         args: --timeout=5m --allow-parallel-runners
-      continue-on-error: true  # Allow to fail for now due to style warnings
+        only-new-issues: true  # Only show new issues in PRs
+        problem-matchers: true  # Enable GitHub problem matchers for better annotations
 
     - name: Run unit tests
       run: go test -v -short -race -coverprofile=coverage.out ./...
@@ -98,6 +104,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     
+    permissions:
+      contents: read
+    
     steps:
     - name: Check out code
       uses: actions/checkout@v5.0.0
@@ -125,6 +134,9 @@ jobs:
     name: Cross-compile
     runs-on: ubuntu-latest
     needs: test
+    
+    permissions:
+      contents: read
     
     steps:
     - name: Check out code
