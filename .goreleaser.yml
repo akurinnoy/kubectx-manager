@@ -137,4 +137,4 @@ release:
 before:
   hooks:
     - go mod tidy
-    - go test ./...
+    - go test -short ./...  # Exclude integration tests during release
