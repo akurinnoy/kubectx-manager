@@ -73,10 +73,8 @@ func TestDebug(t *testing.T) {
 				if !strings.Contains(outputStr, "test message arg") {
 					t.Errorf("Expected formatted message, got %q", outputStr)
 				}
-			} else {
-				if outputStr != "" {
-					t.Errorf("Expected no output, got %q", outputStr)
-				}
+			} else if outputStr != "" {
+				t.Errorf("Expected no output, got %q", outputStr)
 			}
 		})
 	}
@@ -119,10 +117,8 @@ func TestInfo(t *testing.T) {
 				if !strings.Contains(outputStr, "test info message") {
 					t.Errorf("Expected formatted message, got %q", outputStr)
 				}
-			} else {
-				if outputStr != "" {
-					t.Errorf("Expected no output, got %q", outputStr)
-				}
+			} else if outputStr != "" {
+				t.Errorf("Expected no output, got %q", outputStr)
 			}
 		})
 	}
@@ -169,10 +165,8 @@ func TestWarn(t *testing.T) {
 				if !strings.Contains(outputStr, "test warning message") {
 					t.Errorf("Expected formatted message, got %q", outputStr)
 				}
-			} else {
-				if outputStr != "" {
-					t.Errorf("Expected no output, got %q", outputStr)
-				}
+			} else if outputStr != "" {
+				t.Errorf("Expected no output, got %q", outputStr)
 			}
 		})
 	}
@@ -219,10 +213,8 @@ func TestError(t *testing.T) {
 				if !strings.Contains(outputStr, "test error message") {
 					t.Errorf("Expected formatted message, got %q", outputStr)
 				}
-			} else {
-				if outputStr != "" {
-					t.Errorf("Expected no output, got %q", outputStr)
-				}
+			} else if outputStr != "" {
+				t.Errorf("Expected no output, got %q", outputStr)
 			}
 		})
 	}

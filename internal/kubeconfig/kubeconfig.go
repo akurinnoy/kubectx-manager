@@ -47,11 +47,13 @@ type Context struct {
 	Namespace string `yaml:"namespace,omitempty"`
 }
 
+// NamedCluster represents a Kubernetes cluster configuration with its name.
 type NamedCluster struct {
 	Cluster *Cluster `yaml:"cluster"`
 	Name    string   `yaml:"name"`
 }
 
+// Cluster represents a Kubernetes cluster connection configuration.
 type Cluster struct {
 	Server                   string `yaml:"server"`
 	CertificateAuthorityData string `yaml:"certificate-authority-data,omitempty"`
@@ -59,11 +61,13 @@ type Cluster struct {
 	InsecureSkipTLSVerify    bool   `yaml:"insecure-skip-tls-verify,omitempty"`
 }
 
+// NamedUser represents a Kubernetes user with its name.
 type NamedUser struct {
 	User *User  `yaml:"user"`
 	Name string `yaml:"name"`
 }
 
+// User represents a Kubernetes user authentication configuration.
 type User struct {
 	AuthProvider          *AuthProvider          `yaml:"auth-provider,omitempty"`
 	Exec                  *ExecConfig            `yaml:"exec,omitempty"`
@@ -77,11 +81,13 @@ type User struct {
 	Password              string                 `yaml:"password,omitempty"`
 }
 
+// AuthProvider represents an authentication provider configuration.
 type AuthProvider struct {
 	Config map[string]string `yaml:"config,omitempty"`
 	Name   string            `yaml:"name"`
 }
 
+// ExecConfig represents an exec-based authentication configuration.
 type ExecConfig struct {
 	APIVersion string       `yaml:"apiVersion"`
 	Command    string       `yaml:"command"`
@@ -220,11 +226,9 @@ func RemoveContexts(config *Config, contextsToRemove []string) error {
 				usedClusters[namedContext.Context.Cluster] = true
 				usedUsers[namedContext.Context.User] = true
 			}
-		} else {
+		} else if config.CurrentContext == namedContext.Name {
 			// Update current-context if needed
-			if config.CurrentContext == namedContext.Name {
-				config.CurrentContext = ""
-			}
+			config.CurrentContext = ""
 		}
 	}
 	config.Contexts = remainingContexts

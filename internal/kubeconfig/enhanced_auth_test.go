@@ -44,7 +44,7 @@ func TestIsClusterReachable(t *testing.T) {
 		{
 			name: "server responds with error but is reachable",
 			server: func() string {
-				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.WriteHeader(http.StatusUnauthorized)
 					w.Write([]byte(`{"error":"unauthorized"}`))
 				}))
@@ -58,7 +58,7 @@ func TestIsClusterReachable(t *testing.T) {
 		{
 			name: "server with 500 error",
 			server: func() string {
-				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.WriteHeader(http.StatusInternalServerError)
 				}))
 				return server.URL
@@ -270,7 +270,7 @@ func TestEnhancedIsAuthValid(t *testing.T) {
 // TestReachabilityTimeout ensures we don't hang on slow networks
 func TestReachabilityTimeout(t *testing.T) {
 	// Create a server that delays response beyond our timeout
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		time.Sleep(15 * time.Second) // Longer than our 10s client timeout
 		w.WriteHeader(http.StatusOK)
 	}))

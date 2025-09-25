@@ -43,7 +43,7 @@ Intelligently handles backup creation to avoid redundant backups.`,
 	RunE: runRestore,
 }
 
-func init() {
+func init() { //nolint:gochecknoinits // Cobra CLI flag setup requires init
 	rootCmd.AddCommand(restoreCmd)
 	restoreCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose (debug) output")
 	restoreCmd.Flags().BoolVarP(&quiet, "quiet", "q", false, "Suppress all output except errors")
@@ -181,24 +181,26 @@ func findBackups(kubeconfigPath string) ([]Backup, error) {
 	prefix := baseName + ".backup."
 
 	for _, entry := range entries {
-		if !entry.IsDir() && strings.HasPrefix(entry.Name(), prefix) {
-			backupPath := filepath.Join(dir, entry.Name())
-
-			// Extract timestamp from filename
-			timestampStr := strings.TrimPrefix(entry.Name(), prefix)
-			timestamp, err := time.Parse(BackupTimeFormat, timestampStr)
-			if err != nil {
-				continue // Skip files that don't match our backup format
-			}
-
-			backup := Backup{
-				Name:    entry.Name(),
-				Path:    backupPath,
-				Time:    timestamp,
-				TimeStr: timestamp.Format("2006-01-02 15:04:05"),
-			}
-			backups = append(backups, backup)
+		if entry.IsDir() || !strings.HasPrefix(entry.Name(), prefix) {
+			continue
 		}
+
+		backupPath := filepath.Join(dir, entry.Name())
+
+		// Extract timestamp from filename
+		timestampStr := strings.TrimPrefix(entry.Name(), prefix)
+		timestamp, err := time.Parse(BackupTimeFormat, timestampStr)
+		if err != nil {
+			continue // Skip files that don't match our backup format
+		}
+
+		backup := Backup{
+			Name:    entry.Name(),
+			Path:    backupPath,
+			Time:    timestamp,
+			TimeStr: timestamp.Format("2006-01-02 15:04:05"),
+		}
+		backups = append(backups, backup)
 	}
 
 	// Sort backups by time (newest first)

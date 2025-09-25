@@ -41,7 +41,7 @@ func Execute() error {
 	return rootCmd.Execute()
 }
 
-func init() {
+func init() { //nolint:gochecknoinits // Cobra CLI flag setup requires init
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		homeDir = os.Getenv("HOME")

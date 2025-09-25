@@ -74,16 +74,16 @@ func TestRestoreCleanupLogic(t *testing.T) {
 			// Execute the exact cleanup logic from runRestore
 			// Simulate cleanup behavior
 			if !tt.keepBackupFlag {
-				captureLogger.Debug("Cleaning up backup file: %s", selectedBackup.Path)
+				captureLogger.Debugf("Cleaning up backup file: %s", selectedBackup.Path)
 				err = os.Remove(selectedBackup.Path)
 				if err != nil {
 					captureLogger.Warn("Failed to remove backup file %s: %v", selectedBackup.Path, err)
 					captureLogger.Warn("You may want to manually remove it")
 				} else {
-					captureLogger.Info("Removed backup file: %s", selectedBackup.Name)
+					captureLogger.Infof("Removed backup file: %s", selectedBackup.Name)
 				}
 			} else {
-				captureLogger.Info("Backup file preserved: %s", selectedBackup.Name)
+				captureLogger.Infof("Backup file preserved: %s", selectedBackup.Name)
 			}
 
 			// Verify file state
@@ -114,11 +114,11 @@ type CapturingLogger struct {
 	entries []string
 }
 
-func (l *CapturingLogger) Debug(format string, args ...interface{}) {
+func (l *CapturingLogger) Debugf(format string, args ...interface{}) {
 	l.entries = append(l.entries, fmt.Sprintf("[DEBUG] "+format, args...))
 }
 
-func (l *CapturingLogger) Info(format string, args ...interface{}) {
+func (l *CapturingLogger) Infof(format string, args ...interface{}) {
 	l.entries = append(l.entries, fmt.Sprintf("[INFO] "+format, args...))
 }
 
@@ -189,13 +189,13 @@ func TestBackupCleanupWithPermissionError(t *testing.T) {
 	// Execute cleanup logic (should fail but handle gracefully)
 	keepBackupFlag := false
 	if !keepBackupFlag {
-		captureLogger.Debug("Cleaning up backup file: %s", selectedBackup.Path)
+		captureLogger.Debugf("Cleaning up backup file: %s", selectedBackup.Path)
 		err = os.Remove(selectedBackup.Path)
 		if err != nil {
 			captureLogger.Warn("Failed to remove backup file %s: %v", selectedBackup.Path, err)
 			captureLogger.Warn("You may want to manually remove it")
 		} else {
-			captureLogger.Info("Removed backup file: %s", selectedBackup.Name)
+			captureLogger.Infof("Removed backup file: %s", selectedBackup.Name)
 		}
 	}
 
