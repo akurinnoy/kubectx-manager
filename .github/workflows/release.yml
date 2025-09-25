@@ -4,8 +4,6 @@ on:
   push:
     tags:
       - 'v*'
-  pull_request:
-    branches: [ main ]
 
 permissions:
   contents: write
@@ -46,8 +44,7 @@ jobs:
     - name: Run tests
       run: go test -v -short ./...
 
-    - name: Run GoReleaser (Release)
-      if: startsWith(github.ref, 'refs/tags/')
+    - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v6.4.0
       with:
         distribution: goreleaser
@@ -58,18 +55,7 @@ jobs:
         # For Homebrew tap updates (if using a separate tap repo)
         TAP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Run GoReleaser (Snapshot - PR Check)
-      if: github.event_name == 'pull_request'
-      uses: goreleaser/goreleaser-action@v6.4.0
-      with:
-        distribution: goreleaser
-        version: v2.12.3
-        args: release --snapshot --clean --skip=publish
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Upload release summary (Release)
-      if: startsWith(github.ref, 'refs/tags/')
+    - name: Upload release summary
       run: |
         echo "## 🎉 Release ${{ github.ref_name }} Published!" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
@@ -85,21 +71,3 @@ jobs:
         echo "# Extract and verify:" >> $GITHUB_STEP_SUMMARY
         echo "kubectx-manager version" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
-
-    - name: Upload build summary (PR Check)
-      if: github.event_name == 'pull_request'
-      run: |
-        echo "## ✅ Release Build Validation Successful!" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### 🧪 PR Release Check Results:" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ GoReleaser configuration is valid" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ All cross-platform builds successful" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Tests passed (unit tests only)" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Dependencies verified" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### 📦 Build Validation:" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Linux (amd64, arm64)" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ macOS (amd64, arm64)" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Windows (amd64)" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "🚀 **Ready for release!** The next tag push will create a real release."
