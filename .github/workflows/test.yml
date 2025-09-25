@@ -28,10 +28,11 @@ jobs:
     - name: Cache Go modules
       uses: actions/cache@v4.3.0
       with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-1.25-${{ hashFiles('**/go.sum') }}
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
-          ${{ runner.os }}-go-1.25-
           ${{ runner.os }}-go-
 
     - name: Download dependencies
