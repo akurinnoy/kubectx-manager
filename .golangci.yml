@@ -6,11 +6,7 @@ run:
   tests: true
   modules-download-mode: readonly
 
-output:
-  formats:
-    colored-line-number: stdout
-  print-issued-lines: true
-  print-linter-name: true
+# output: removed for v2.5.0 compatibility - using defaults
 
 linters-settings:
   errcheck:
