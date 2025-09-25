@@ -4,11 +4,7 @@ run:
   tests: true
   modules-download-mode: readonly
 
-output:
-  formats:
-    - format: colored-line-number
-  print-issued-lines: true
-  print-linter-name: true
+# output: using defaults to maintain v1/v2 compatibility
 
 linters-settings:
   errcheck:
