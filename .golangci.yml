@@ -5,9 +5,7 @@ run:
   modules-download-mode: readonly
 
 output:
-  formats:
-    - format: colored-line-number
-      path: stdout
+  format: colored-line-number
   print-issued-lines: true
   print-linter-name: true
 
@@ -28,8 +26,9 @@ linters-settings:
   goimports:
     local-prefixes: github.com/akurinnoy/kubectx-manager
 
-  golint:
-    min-confidence: 0.8
+  # golint: deprecated, replaced by revive
+  revive:
+    confidence: 0.8
 
   goconst:
     min-len: 3
@@ -54,8 +53,7 @@ linters-settings:
   lll:
     line-length: 120
 
-  maligned:
-    suggest-new: true
+  # maligned: deprecated linter, removed
 
   dupl:
     threshold: 100
@@ -117,11 +115,15 @@ linters:
   # - godot
   # - godox
   # - goerr113
-  # - maligned
   # - nestif
   # - prealloc
   # - testpackage
   # - wsl
+  # 
+  # Deprecated/removed linters:
+  # - golint (use revive instead)
+  # - maligned (removed from golangci-lint)
+  # - gomnd (renamed to mnd)
 
 issues:
   exclude-rules:
@@ -134,7 +136,7 @@ issues:
         - gosec
         - funlen
         - goconst
-        - gomnd
+        - mnd
 
     # Exclude known linters from partially hard-to-fix issues
     - path: cmd/
