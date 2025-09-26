@@ -276,7 +276,7 @@ The testing framework includes utilities for:
 go test -v -run=TestSpecificFunction ./package
 
 # Debug with delve
-dlv test github.com/akurinnoy/kubectx-manager/internal/config
+dlv test github.com/che-incubator/kubectx-manager/internal/config
 
 # Print coverage details
 go test -v -coverprofile=profile.out ./...

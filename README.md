@@ -42,7 +42,7 @@ A smart CLI tool for managing Kubernetes contexts with pattern-based scoping. Fe
 Use the repository as tap:
 
 ```bash
-brew tap akurinnoy/kubectx-manager
+brew tap che-incubator/kubectx-manager
 brew install kubectx-manager
 ```
 
@@ -50,7 +50,7 @@ brew install kubectx-manager
 
 ```bash
 # Clone and build
-git clone https://github.com/akurinnoy/kubectx-manager.git
+git clone https://github.com/che-incubator/kubectx-manager.git
 cd kubectx-manager
 go build -o kubectx-manager
 
@@ -70,7 +70,7 @@ kubectx-manager --help
 
 ```bash
 # Clone and build
-git clone https://github.com/akurinnoy/kubectx-manager.git
+git clone https://github.com/che-incubator/kubectx-manager.git
 cd kubectx-manager
 go build -o kubectx-manager
 
@@ -85,14 +85,14 @@ kubectx-manager --help
 
 ```bash
 # Install directly from GitHub (when repository is published)
-go install github.com/akurinnoy/kubectx-manager@latest
+go install github.com/che-incubator/kubectx-manager@latest
 ```
 
 ### Pre-built Binary Installation
 
 ```bash
 # Download and install in one command
-curl -sSL https://github.com/akurinnoy/kubectx-manager/releases/latest/download/kubectx-manager-$(uname -s)-$(uname -m) -o $HOME/bin/kubectx-manager
+curl -sSL https://github.com/che-incubator/kubectx-manager/releases/latest/download/kubectx-manager-$(uname -s)-$(uname -m) -o $HOME/bin/kubectx-manager
 chmod +x $HOME/bin/kubectx-manager
 ```
 
@@ -446,5 +446,5 @@ EPL-2.0 (Eclipse Public License 2.0) - see LICENSE file for details.
 
 ## Support
 
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/akurinnoy/kubectx-manager/issues)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/che-incubator/kubectx-manager/issues)
 - 📖 **Documentation**: This README and `kubectx-manager --help`
