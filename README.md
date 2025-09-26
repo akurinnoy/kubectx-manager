@@ -37,16 +37,7 @@ A smart CLI tool for managing Kubernetes contexts with pattern-based scoping. Fe
 
 ## Installation
 
-### Using Homebrew
-
-Use the repository as tap:
-
-```bash
-brew tap che-incubator/kubectx-manager
-brew install kubectx-manager
-```
-
-### User Installation (Recommended for Development)
+### User Installation (Recommended)
 
 ```bash
 # Clone and build
@@ -81,20 +72,17 @@ sudo cp kubectx-manager /usr/local/bin/
 kubectx-manager --help
 ```
 
-### Using Go Install (if published)
-
-```bash
-# Install directly from GitHub (when repository is published)
-go install github.com/che-incubator/kubectx-manager@latest
-```
-
 ### Pre-built Binary Installation
 
-```bash
-# Download and install in one command
-curl -sSL https://github.com/che-incubator/kubectx-manager/releases/latest/download/kubectx-manager-$(uname -s)-$(uname -m) -o $HOME/bin/kubectx-manager
-chmod +x $HOME/bin/kubectx-manager
-```
+1. **Download binary from [GitHub Releases](https://github.com/che-incubator/kubectx-manager/releases/latest)**
+2. **Extract and install**:
+
+   ```bash
+   # Download appropriate archive for your platform from the link above
+   tar -xzf kubectx-manager_*_*.tar.gz  # (or unzip for Windows)
+   sudo mv kubectx-manager /usr/local/bin/
+   kubectx-manager --help  # Verify installation
+   ```
 
 ## Quick Start
 
