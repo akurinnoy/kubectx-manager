@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/akurinnoy/kubectx-manager/cmd"
+	"github.com/che-incubator/kubectx-manager/cmd"
 )
 
 func main() {

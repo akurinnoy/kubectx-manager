@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/akurinnoy/kubectx-manager/internal/kubeconfig"
-	"github.com/akurinnoy/kubectx-manager/internal/logger"
+	"github.com/che-incubator/kubectx-manager/internal/kubeconfig"
+	"github.com/che-incubator/kubectx-manager/internal/logger"
 )
 
 func TestAnalyzeRestoreConflicts(t *testing.T) {

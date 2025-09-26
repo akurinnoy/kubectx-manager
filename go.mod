@@ -1,4 +1,4 @@
-module github.com/akurinnoy/kubectx-manager
+module github.com/che-incubator/kubectx-manager
 
 go 1.21
 

@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/akurinnoy/kubectx-manager/internal/kubeconfig"
+	"github.com/che-incubator/kubectx-manager/internal/kubeconfig"
 )
 
 // TestRestoreCleanupLogic tests the actual cleanup logic from runRestore function
