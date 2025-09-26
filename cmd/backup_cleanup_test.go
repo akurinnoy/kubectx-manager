@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/akurinnoy/kubectx-manager/internal/kubeconfig"
-	"github.com/akurinnoy/kubectx-manager/internal/logger"
+	"github.com/che-incubator/kubectx-manager/internal/kubeconfig"
+	"github.com/che-incubator/kubectx-manager/internal/logger"
 )
 
 func TestBackupCleanupAfterRestore(t *testing.T) {

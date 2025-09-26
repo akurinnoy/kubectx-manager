@@ -7,9 +7,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/akurinnoy/kubectx-manager/internal/config"
-	"github.com/akurinnoy/kubectx-manager/internal/kubeconfig"
-	"github.com/akurinnoy/kubectx-manager/internal/logger"
+	"github.com/che-incubator/kubectx-manager/internal/config"
+	"github.com/che-incubator/kubectx-manager/internal/kubeconfig"
+	"github.com/che-incubator/kubectx-manager/internal/logger"
 )
 
 // Version information, set by build flags
