@@ -37,7 +37,31 @@ A smart CLI tool for managing Kubernetes contexts with pattern-based scoping. Fe
 
 ## Installation
 
-### User Installation (Recommended)
+### Quick Install (Recommended)
+
+**One-line install script** (downloads latest release):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/che-incubator/kubectx-manager/main/install.sh | bash
+```
+
+Or download and inspect the script first:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/che-incubator/kubectx-manager/main/install.sh -o install.sh
+chmod +x install.sh
+./install.sh --help  # View options
+./install.sh         # Run installation
+```
+
+The script will:
+
+- 🔍 Auto-detect your platform (Linux/macOS, amd64/arm64)
+- 📥 Download the latest release from GitHub
+- 📦 Install to `/usr/local/bin` (or `~/bin` if no sudo permissions)
+- ✅ Verify the installation
+
+### Manual Installation from Source
 
 ```bash
 # Clone and build
